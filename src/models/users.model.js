@@ -1,7 +1,7 @@
 import {DataTypes} from 'sequelize';
 import {sequelize} from '../config/database.js';
 
-const User = sequelize.define(
+const User = sequelize.define (
   'Users',
   {
     id: {
@@ -39,7 +39,7 @@ const User = sequelize.define(
       },
     },
     status: {
-      type: DataTypes.ENUM('active', 'inactive'),
+      type: DataTypes.ENUM ('active', 'inactive'),
       allowNull: false,
       defaultValue: 'active',
     },
