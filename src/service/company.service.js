@@ -1,6 +1,7 @@
 import {sequelize} from '../config/database.js';
 import Company from '../models/company.model.js';
 import User from '../models/users.model.js';
+import {hashPassword} from '../utils/hashPassword.js';
 import randomPasswordGenerate from '../utils/password.js';
 import {sendEmail} from './email.service.js';
 
@@ -24,11 +25,13 @@ export const createCompanyService = async data => {
     // generate password
     const password = randomPasswordGenerate ();
 
+    const hashedPassword = await hashPassword(password);
+
     const user = {
       company_id: response.id,
       name: data.name,
       email: data.email,
-      password: password,
+      password: hashedPassword,
       role_id: 1,
       status: 'active',
     };

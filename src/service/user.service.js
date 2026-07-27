@@ -1,6 +1,7 @@
 import Company from '../models/company.model.js';
 import Role from '../models/roles.model.js';
 import User from '../models/users.model.js';
+import {hashPassword} from '../utils/hashPassword.js';
 import {sendEmail} from './email.service.js';
 
 const userAttribute = {
@@ -35,12 +36,13 @@ export const createUserService = async data => {
     }
 
     const password = data.password;
+    const hashedPassword = await hashPassword(password);
 
     const user = await User.create ({
       company_id: data.company_id,
       name: data.name,
       email: data.email,
-      password,
+      password: hashedPassword,
       role_id: data.role_id,
       status: data.status || 'active',
     });

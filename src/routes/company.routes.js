@@ -3,9 +3,11 @@ import {
   createCompanyController,
   getCompanyController,
 } from '../controllers/company.controller.js';
+import {authenticate} from '../middleware/auth.middleware.js';
 
 const router = express.Router ();
+router.post ('/create', createCompanyController);
+router.get ('/', getCompanyController);
+// router.get ('/:id', getCompanyByIdController);
 
-router.post ('/create/company', createCompanyController);
-router.get ('/get-all', getCompanyController);
 export default router;
