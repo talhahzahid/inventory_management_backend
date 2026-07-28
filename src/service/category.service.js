@@ -1,8 +1,15 @@
 import Category from '../models/categories.model.js';
 import Company from '../models/company.model.js';
 
+const assertOwnership = (record, companyId) => {
+  if (companyId && record.company_id !== companyId) {
+    const error = new Error('Access denied');
+    error.statusCode = 403;
+    throw error;
+  }
+};
+
 export const createCategoryService = async data => {
-  console.log(data.company_id, 'company_id')
   try {
     const company = await Company.findByPk(data.company_id);
 
@@ -49,9 +56,6 @@ export const getAllCategoriesService = async (
   status = null
 ) => {
   try {
-
-    // get category by id
-
     if (id) {
       const category = await Category.findByPk(id, {
         include: [
@@ -69,6 +73,8 @@ export const getAllCategoriesService = async (
         throw err;
       }
 
+      assertOwnership(category, companyId);
+
       return category;
     }
 
@@ -80,9 +86,9 @@ export const getAllCategoriesService = async (
     if (companyId) {
       where.company_id = companyId;
     }
-    // if (status) {
-    //   where.status = status;
-    // }
+    if (status) {
+      where.status = status;
+    }
 
     const {count, rows} = await Category.findAndCountAll({
       where,
@@ -112,7 +118,7 @@ export const getAllCategoriesService = async (
   }
 };
 
-export const updateCategoryService = async (id, data) => {
+export const updateCategoryService = async (id, data, companyId = null) => {
   try {
     const category = await Category.findByPk(id);
 
@@ -122,23 +128,14 @@ export const updateCategoryService = async (id, data) => {
       throw error;
     }
 
-    if (data.company_id && data.company_id !== category.company_id) {
-      const company = await Company.findByPk(data.company_id);
+    assertOwnership(category, companyId);
 
-      if (!company) {
-        const error = new Error('Company not found');
-        error.statusCode = 404;
-        throw error;
-      }
-    }
-
-    const companyId = data.company_id || category.company_id;
     const name = data.name || category.name;
 
-    if (data.name || data.company_id) {
+    if (data.name) {
       const existingCategory = await Category.findOne({
         where: {
-          company_id: companyId,
+          company_id: category.company_id,
           name,
         },
       });
@@ -151,7 +148,6 @@ export const updateCategoryService = async (id, data) => {
     }
 
     await category.update({
-      company_id: data.company_id ?? category.company_id,
       name: data.name ?? category.name,
       description: data.description ?? category.description,
       status: data.status ?? category.status,
@@ -166,7 +162,7 @@ export const updateCategoryService = async (id, data) => {
   }
 };
 
-export const deactivateCategoryService = async id => {
+export const deactivateCategoryService = async (id, companyId = null) => {
   try {
     const category = await Category.findByPk(id);
 
@@ -175,6 +171,8 @@ export const deactivateCategoryService = async id => {
       error.statusCode = 404;
       throw error;
     }
+
+    assertOwnership(category, companyId);
 
     if (category.status === 'inactive') {
       const error = new Error('Category is already inactive');

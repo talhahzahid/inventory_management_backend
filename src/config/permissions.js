@@ -1,5 +1,3 @@
-import { read } from "node:fs";
-
 export const ROLES = {
   SUPER_ADMIN: "superAdmin",
   ADMIN: "admin",
@@ -7,7 +5,7 @@ export const ROLES = {
   EMPLOYEE: "employee",
 };
 
-export const PERMISSION = {
+export const PERMISSIONS = {
   roles: {
     create: [ROLES.SUPER_ADMIN],
     read: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGER],

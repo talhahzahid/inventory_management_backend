@@ -6,34 +6,43 @@ import ApiResponse from '../utils/ApiResponse.js';
 
 export const createUserController = async (req, res) => {
   try {
-    const user = await createUserService (req.body);
-    res.status (201).json ({message: 'User created successfully', data: user});
+    const user = await createUserService(req.body);
+    res
+      .status(201)
+      .json(ApiResponse(201, 'User created successfully', user));
   } catch (error) {
-    res.status (error.statusCode || 500).json ({message: error.message});
+    res
+      .status(error.statusCode || 500)
+      .json(ApiResponse(error.statusCode || 500, error.message, null));
   }
 };
 
 export const getAllUsersController = async (req, res) => {
   try {
     const {page = 1, limit = 10} = req.query;
-    const result = await getAllUsersService (page, limit);
+    const result = await getAllUsersService(page, limit);
 
-    res.status (200).json ({message: 'Users fetched successfully', ...result});
+    res
+      .status(200)
+      .json(ApiResponse(200, 'Users fetched successfully', result));
   } catch (error) {
-    res.status (error.statusCode || 500).json ({message: error.message});
+    res
+      .status(error.statusCode || 500)
+      .json(ApiResponse(error.statusCode || 500, error.message, null));
   }
 };
 
 export const getUsersByIdController = async (req, res) => {
   try {
-    const {page = 1, limit = 10} = req.query;
     const {id} = req.params;
-    const result = await getAllUsersService (page, limit, id);
+    const result = await getAllUsersService(null, null, id);
 
     res
-      .status (200)
-      .json (ApiResponse (200, 'User fetched successfully', result));
+      .status(200)
+      .json(ApiResponse(200, 'User fetched successfully', result));
   } catch (error) {
-    res.status (error.statusCode || 500).json ({message: error.message});
+    res
+      .status(error.statusCode || 500)
+      .json(ApiResponse(error.statusCode || 500, error.message, null));
   }
 };

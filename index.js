@@ -5,6 +5,7 @@ import './src/models/index.js';
 // import roleRouter from './src/routes/role.routes.js';
 // import companyRouter from './src/routes/company.routes.js';
 import apiRoutes from './src/routes/index.js';
+import {seedRoles} from './src/seed/roles.seed.js';
 
 dotenv.config ();
 const app = express ();
@@ -23,6 +24,7 @@ const startServer = async () => {
   try {
     await sequelize.authenticate ();
     await sequelize.sync ();
+    await seedRoles ();
     console.log ('✔ Database connected successfully!');
     app.listen (port, () => {
       console.log (`server is running at port ${port}`);
