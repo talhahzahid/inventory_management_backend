@@ -1,35 +1,41 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/users.model.js';
-import Role from '../models/roles.model.js';
-import {jwtConfig} from '../config/jwt.js';
-import {comparePassword} from '../utils/hashPassword.js';
+import jwt from "jsonwebtoken";
+import User from "../models/users.model.js";
+import Role from "../models/roles.model.js";
+import { jwtConfig } from "../config/jwt.js";
+import { comparePassword } from "../utils/hashPassword.js";
+import Company from "../models/company.model.js";
 
-export const loginService = async ({email, password}) => {
+export const loginService = async ({ email, password }) => {
   if (!email || !password) {
-    const error = new Error('Email and password are required');
+    const error = new Error("Email and password are required");
     error.statusCode = 400;
     throw error;
   }
 
   const user = await User.findOne({
-    where: {email},
+    where: { email },
     include: [
       {
         model: Role,
-        as: 'role',
-        attributes: ['id', 'name'],
+        as: "role",
+        attributes: ["id", "name"],
+      },
+      {
+        model: Company,
+        as: "company",
+        attributes: ["name"],
       },
     ],
   });
 
   if (!user) {
-    const error = new Error('Invalid email or password');
+    const error = new Error("Invalid email or password");
     error.statusCode = 401;
     throw error;
   }
 
-  if (user.status !== 'active') {
-    const error = new Error('Account is inactive');
+  if (user.status !== "active") {
+    const error = new Error("Account is inactive");
     error.statusCode = 403;
     throw error;
   }
@@ -37,7 +43,7 @@ export const loginService = async ({email, password}) => {
   const isPasswordValid = await comparePassword(password, user.password);
 
   if (!isPasswordValid) {
-    const error = new Error('Invalid email or password');
+    const error = new Error("Invalid email or password");
     error.statusCode = 401;
     throw error;
   }
@@ -51,7 +57,7 @@ export const loginService = async ({email, password}) => {
       role: user.role?.name,
     },
     jwtConfig.secret,
-    {expiresIn: jwtConfig.expiresIn}
+    { expiresIn: jwtConfig.expiresIn },
   );
 
   return {
@@ -61,6 +67,7 @@ export const loginService = async ({email, password}) => {
       name: user.name,
       email: user.email,
       company_id: user.company_id,
+      company_name: user.company?.name,
       role_id: user.role_id,
       role: user.role?.name,
     },

@@ -1,5 +1,6 @@
 import Category from '../models/categories.model.js';
 import Company from '../models/company.model.js';
+import {Op} from 'sequelize';
 
 const assertOwnership = (record, companyId) => {
   if (companyId && record.company_id !== companyId) {
@@ -53,7 +54,8 @@ export const getAllCategoriesService = async (
   limit,
   id = null,
   companyId = null,
-  status = null
+  status = null,
+  search = null
 ) => {
   try {
     if (id) {
@@ -88,6 +90,11 @@ export const getAllCategoriesService = async (
     }
     if (status) {
       where.status = status;
+    }
+    if (search?.trim()) {
+      where.name = {
+        [Op.iLike]: `%${search.trim()}%`,
+      };
     }
 
     const {count, rows} = await Category.findAndCountAll({

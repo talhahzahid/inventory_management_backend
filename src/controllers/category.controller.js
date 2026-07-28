@@ -27,7 +27,8 @@ export const createCategoryController = async (req, res) => {
 
 export const getAllCategoriesController = async (req, res) => {
   try {
-    const {page = 1, limit = 10, status} = req.query;
+    const {page = 1, limit = 10, status, search, name} = req.query;
+    const searchTerm = search || name;
 
     const resolvedStatus =
       req.user.role === ROLES.EMPLOYEE ? status || 'active' : status;
@@ -37,7 +38,8 @@ export const getAllCategoriesController = async (req, res) => {
       limit,
       null,
       req.companyId,
-      resolvedStatus
+      resolvedStatus,
+      searchTerm
     );
 
     res
