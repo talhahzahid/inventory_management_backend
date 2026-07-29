@@ -63,8 +63,8 @@ export const getAllSupplierService = async (
     if (company_id) {
       where.company_id = company_id;
     }
-    if(status){
-      where.status = status
+    if (status) {
+      where.status = status;
     }
     if (search) {
       where[Op.or] = [

@@ -20,8 +20,14 @@ export const getAllUsersController = async (req, res) => {
     const { id } = req.params;
     const { page = 1, limit = 10, search, status } = req.query;
     const { company_id } = req.user;
-    console.log(company_id, "company_id");
-    const result = await getAllUsersService(page, limit, id);
+    const result = await getAllUsersService(
+      page,
+      limit,
+      id,
+      company_id,
+      search,
+      status,
+    );
 
     res
       .status(200)

@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import Company from "../models/company.model.js";
 import Role from "../models/roles.model.js";
 import User from "../models/users.model.js";
@@ -70,26 +71,51 @@ export const getAllUsersService = async (
   page,
   limit,
   id = null,
+  company_id = null,
   search = null,
   status = null,
 ) => {
   try {
+    const pageNumber = Math.max(1, Number(page) || 1);
+    const pageSize = Math.max(1, Number(limit) || 10);
+    const offset = (pageNumber - 1) * pageSize;
+
+    const where = {};
+
+    if (company_id) {
+      where.company_id = company_id;
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (search) {
+      where[Op.or] = [
+        { name: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+
+    const include = [
+      {
+        model: Company,
+        as: "company",
+        attributes: ["id", "name", "email"],
+      },
+      {
+        model: Role,
+        as: "role",
+        attributes: ["id", "name"],
+      },
+    ];
+
     // Get single user by ID
     if (id) {
-      const user = await User.findByPk(id, {
+      const user = await User.findOne({
+        where: { ...where, id },
         attributes: userAttribute,
-        include: [
-          {
-            model: Company,
-            as: "company",
-            attributes: ["id", "name", "email"],
-          },
-          {
-            model: Role,
-            as: "role",
-            attributes: ["id", "name"],
-          },
-        ],
+        include,
       });
 
       if (!user) {
@@ -101,25 +127,10 @@ export const getAllUsersService = async (
       return user;
     }
 
-    // Pagination
-    const pageNumber = Math.max(1, Number(page) || 1);
-    const pageSize = Math.max(1, Number(limit) || 10);
-    const offset = (pageNumber - 1) * pageSize;
-
     const { count, rows } = await User.findAndCountAll({
+      where,
       attributes: userAttribute,
-      include: [
-        {
-          model: Company,
-          as: "company",
-          attributes: ["id", "name", "email"],
-        },
-        {
-          model: Role,
-          as: "role",
-          attributes: ["id", "name"],
-        },
-      ],
+      include,
       limit: pageSize,
       offset,
       order: [["id", "ASC"]],
