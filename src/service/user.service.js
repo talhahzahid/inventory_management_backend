@@ -10,6 +10,7 @@ const userAttribute = {
 };
 
 export const createUserService = async (data, company_id) => {
+  console.log(company_id, "company id");
   try {
     const existingUser = await User.findOne({
       where: { email: data.email },
@@ -21,7 +22,7 @@ export const createUserService = async (data, company_id) => {
       throw error;
     }
 
-    const company = await Company.findByPk(data.company_id);
+    const company = await Company.findByPk(company_id);
 
     if (!company) {
       const error = new Error("Company not found");
