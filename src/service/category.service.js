@@ -1,21 +1,21 @@
-import Category from '../models/categories.model.js';
-import Company from '../models/company.model.js';
-import {Op} from 'sequelize';
+import Category from "../models/categories.model.js";
+import Company from "../models/company.model.js";
+import { Op } from "sequelize";
 
 const assertOwnership = (record, companyId) => {
   if (companyId && record.company_id !== companyId) {
-    const error = new Error('Access denied');
+    const error = new Error("Access denied");
     error.statusCode = 403;
     throw error;
   }
 };
 
-export const createCategoryService = async data => {
+export const createCategoryService = async (data) => {
   try {
     const company = await Company.findByPk(data.company_id);
 
     if (!company) {
-      const error = new Error('Company not found');
+      const error = new Error("Company not found");
       error.statusCode = 404;
       throw error;
     }
@@ -28,7 +28,7 @@ export const createCategoryService = async data => {
     });
 
     if (existingCategory) {
-      const error = new Error('Category with this name already exists');
+      const error = new Error("Category with this name already exists");
       error.statusCode = 409;
       throw error;
     }
@@ -37,13 +37,13 @@ export const createCategoryService = async data => {
       company_id: data.company_id,
       name: data.name,
       description: data.description,
-      status: data.status || 'active',
+      status: data.status || "active",
     });
 
     return category;
   } catch (error) {
     if (error.statusCode) throw error;
-    const err = new Error(error.message || 'Failed to create category');
+    const err = new Error(error.message || "Failed to create category");
     err.statusCode = 500;
     throw err;
   }
@@ -55,7 +55,7 @@ export const getAllCategoriesService = async (
   id = null,
   companyId = null,
   status = null,
-  search = null
+  search = null,
 ) => {
   try {
     if (id) {
@@ -63,14 +63,14 @@ export const getAllCategoriesService = async (
         include: [
           {
             model: Company,
-            as: 'company',
-            attributes: ['id', 'name', 'email'],
+            as: "company",
+            attributes: ["id", "name", "email"],
           },
         ],
       });
 
       if (!category) {
-        const err = new Error('Category not found');
+        const err = new Error("Category not found");
         err.statusCode = 404;
         throw err;
       }
@@ -97,18 +97,18 @@ export const getAllCategoriesService = async (
       };
     }
 
-    const {count, rows} = await Category.findAndCountAll({
+    const { count, rows } = await Category.findAndCountAll({
       where,
       include: [
         {
           model: Company,
-          as: 'company',
-          attributes: ['id', 'name', 'email'],
+          as: "company",
+          attributes: ["id", "name", "email"],
         },
       ],
       limit: pageSize,
       offset,
-      order: [['id', 'ASC']],
+      order: [["id", "ASC"]],
     });
 
     return {
@@ -119,7 +119,7 @@ export const getAllCategoriesService = async (
       data: rows,
     };
   } catch (error) {
-    const err = new Error(error.message || 'Failed to fetch categories');
+    const err = new Error(error.message || "Failed to fetch categories");
     err.statusCode = error.statusCode || 500;
     throw err;
   }
@@ -130,7 +130,7 @@ export const updateCategoryService = async (id, data, companyId = null) => {
     const category = await Category.findByPk(id);
 
     if (!category) {
-      const error = new Error('Category not found');
+      const error = new Error("Category not found");
       error.statusCode = 404;
       throw error;
     }
@@ -148,7 +148,7 @@ export const updateCategoryService = async (id, data, companyId = null) => {
       });
 
       if (existingCategory && existingCategory.id !== category.id) {
-        const error = new Error('Category with this name already exists');
+        const error = new Error("Category with this name already exists");
         error.statusCode = 409;
         throw error;
       }
@@ -163,7 +163,7 @@ export const updateCategoryService = async (id, data, companyId = null) => {
     return category;
   } catch (error) {
     if (error.statusCode) throw error;
-    const err = new Error(error.message || 'Failed to update category');
+    const err = new Error(error.message || "Failed to update category");
     err.statusCode = 500;
     throw err;
   }
@@ -174,25 +174,25 @@ export const deactivateCategoryService = async (id, companyId = null) => {
     const category = await Category.findByPk(id);
 
     if (!category) {
-      const error = new Error('Category not found');
+      const error = new Error("Category not found");
       error.statusCode = 404;
       throw error;
     }
 
     assertOwnership(category, companyId);
 
-    if (category.status === 'inactive') {
-      const error = new Error('Category is already inactive');
+    if (category.status === "inactive") {
+      const error = new Error("Category is already inactive");
       error.statusCode = 409;
       throw error;
     }
 
-    await category.update({status: 'inactive'});
+    await category.update({ status: "inactive" });
 
     return category;
   } catch (error) {
     if (error.statusCode) throw error;
-    const err = new Error(error.message || 'Failed to deactivate category');
+    const err = new Error(error.message || "Failed to deactivate category");
     err.statusCode = 500;
     throw err;
   }

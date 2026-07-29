@@ -1,29 +1,30 @@
-import {sequelize} from '../config/database.js';
-import Company from '../models/company.model.js';
-import User from '../models/users.model.js';
-import {hashPassword} from '../utils/hashPassword.js';
-import randomPasswordGenerate from '../utils/password.js';
-import {sendEmail} from './email.service.js';
+import { Op } from "sequelize";
+import { sequelize } from "../config/database.js";
+import Company from "../models/company.model.js";
+import User from "../models/users.model.js";
+import { hashPassword } from "../utils/hashPassword.js";
+import randomPasswordGenerate from "../utils/password.js";
+import { sendEmail } from "./email.service.js";
 
-export const createCompanyService = async data => {
-  const t = await sequelize.transaction ();
+export const createCompanyService = async (data) => {
+  const t = await sequelize.transaction();
 
   try {
-    const existingCompany = await Company.findOne ({
-      where: {email: data.email},
+    const existingCompany = await Company.findOne({
+      where: { email: data.email },
       transaction: t,
     });
 
     if (existingCompany) {
-      const error = new Error ('Company with this email already exists');
+      const error = new Error("Company with this email already exists");
       error.statusCode = 409;
       throw error;
     }
 
-    const response = await Company.create (data, {transaction: t});
+    const response = await Company.create(data, { transaction: t });
 
     // generate password
-    const password = randomPasswordGenerate ();
+    const password = randomPasswordGenerate();
 
     const hashedPassword = await hashPassword(password);
 
@@ -33,37 +34,66 @@ export const createCompanyService = async data => {
       email: data.email,
       password: hashedPassword,
       role_id: 1,
-      status: 'active',
+      status: "active",
     };
 
-    await User.create (user, {transaction: t});
+    await User.create(user, { transaction: t });
 
-    await t.commit ();
+    await t.commit();
 
     try {
-      await sendEmail (data.email, 'Welcome', `Your password is: ${password}`);
+      await sendEmail(data.email, "Welcome", `Your password is: ${password}`);
     } catch (emailError) {
-      console.error ('Failed to send welcome email:', emailError);
+      console.error("Failed to send welcome email:", emailError);
     }
 
     return response;
   } catch (error) {
-    await t.rollback ();
+    await t.rollback();
 
     if (error.statusCode) throw error;
-    const err = new Error (error.message || 'Failed to create company');
+    const err = new Error(error.message || "Failed to create company");
     err.statusCode = 500;
     throw err;
   }
 };
 
-export const getCompanyService = async (page, limit) => {
+export const getCompanyService = async (
+  page,
+  limit,
+  id = null,
+  search = null,
+  status = null,
+) => {
   try {
-    const pageNumber = Number (page) || 1;
-    const pageSize = Number (limit) || 10;
+    const pageNumber = Number(page) || 1;
+    const pageSize = Number(limit) || 10;
     const offset = (pageNumber - 1) * pageSize;
 
-    const {count, rows} = await Company.findAndCountAll ({
+    if (id) {
+      const response = await Company.findByPk(id);
+      return response;
+    }
+
+    let where = {};
+
+    if (status) {
+      where.status = status;
+    }
+    console.log(search, "search");
+    if (search) {
+      where[Op.or] = [
+        {
+          name: { [Op.iLike]: `%${search}%` },
+        },
+        {
+          email: { [Op.iLike]: `%${search}%` },
+        },
+      ];
+    }
+
+    const { count, rows } = await Company.findAndCountAll({
+      where,
       limit: pageSize,
       offset,
     });
@@ -71,11 +101,11 @@ export const getCompanyService = async (page, limit) => {
     return {
       total: count,
       page: pageNumber,
-      totalPages: Math.ceil (count / pageSize),
+      totalPages: Math.ceil(count / pageSize),
       data: rows,
     };
   } catch (error) {
-    const err = new Error (error.message || 'Failed to fetch companies');
+    const err = new Error(error.message || "Failed to fetch companies");
     err.statusCode = 500;
     throw err;
   }

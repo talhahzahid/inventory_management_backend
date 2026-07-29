@@ -24,7 +24,12 @@ export const PERMISSIONS = {
   },
   companies: {
     create: [ROLES.SUPER_ADMIN],
-    read: [ROLES.SUPER_ADMIN],
+    read: [ROLES.SUPER_ADMIN, ROLES.ADMIN],
     update: [ROLES.SUPER_ADMIN, ROLES.ADMIN],
+  },
+  suppliers: {
+    create: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGER],
+    read: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGER, ROLES.EMPLOYEE],
+    update: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.MANAGER],
   },
 };
