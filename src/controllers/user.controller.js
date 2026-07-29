@@ -5,8 +5,9 @@ import {
 import ApiResponse from "../utils/ApiResponse.js";
 
 export const createUserController = async (req, res) => {
+  const { company_id } = req.user;
   try {
-    const user = await createUserService(req.body);
+    const user = await createUserService(req.body, company_id);
     res.status(201).json(ApiResponse(201, "User created successfully", user));
   } catch (error) {
     res

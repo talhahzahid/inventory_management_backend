@@ -9,7 +9,7 @@ const userAttribute = {
   exclude: ["password"],
 };
 
-export const createUserService = async (data) => {
+export const createUserService = async (data, company_id) => {
   try {
     const existingUser = await User.findOne({
       where: { email: data.email },
@@ -40,7 +40,7 @@ export const createUserService = async (data) => {
     const hashedPassword = await hashPassword(password);
 
     const user = await User.create({
-      company_id: data.company_id,
+      company_id: company_id,
       name: data.name,
       email: data.email,
       password: hashedPassword,
