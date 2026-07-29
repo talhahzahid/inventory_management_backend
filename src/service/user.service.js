@@ -10,7 +10,6 @@ const userAttribute = {
 };
 
 export const createUserService = async (data, company_id) => {
-  console.log(company_id, "company id");
   try {
     const existingUser = await User.findOne({
       where: { email: data.email },
@@ -49,17 +48,15 @@ export const createUserService = async (data, company_id) => {
       status: data.status || "active",
     });
 
-    try {
-      await sendEmail(
-        data.email,
-        "Welcome",
-        `Your Account has been created. Your password is: ${password}`,
-      );
-    } catch (emailError) {
+    sendEmail(
+      data.email,
+      "Welcome",
+      `Your Account has been created. Your password is: ${password}`,
+    ).catch((emailError) => {
       console.log("Failed to send welcome email", emailError);
-    }
+    });
 
-    return user;
+    return user.get({ plain: true, attributes: { exclude: ["password"] } });
   } catch (error) {
     if (error.statusCode) throw error;
     const err = new Error(error.message || "Failed to create user");
