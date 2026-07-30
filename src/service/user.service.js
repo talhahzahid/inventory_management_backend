@@ -9,6 +9,14 @@ const userAttribute = {
   exclude: ["password"],
 };
 
+const assertOwnership = (record, companyId) => {
+  if (companyId && record.company_id !== companyId) {
+    const error = new Error("Access denied");
+    error.statusCode = 403;
+    throw error;
+  }
+};
+
 export const createUserService = async (data, company_id) => {
   try {
     const existingUser = await User.findOne({
@@ -122,6 +130,8 @@ export const getAllUsersService = async (
         throw err;
       }
 
+      assertOwnership(user, company_id);
+
       return user;
     }
 
@@ -144,6 +154,107 @@ export const getAllUsersService = async (
   } catch (error) {
     const err = new Error(error.message || "Failed to fetch users");
     err.statusCode = error.statusCode || 500;
+    throw err;
+  }
+};
+
+export const updateUserService = async (id, data, companyId = null) => {
+  try {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    assertOwnership(user, companyId);
+
+    if (data.email && data.email !== user.email) {
+      const existingUser = await User.findOne({
+        where: { email: data.email },
+      });
+
+      if (existingUser && existingUser.id !== user.id) {
+        const error = new Error("User with this email already exists");
+        error.statusCode = 409;
+        throw error;
+      }
+    }
+
+    if (data.role_id) {
+      const role = await Role.findByPk(data.role_id);
+
+      if (!role) {
+        const error = new Error("Role not found");
+        error.statusCode = 404;
+        throw error;
+      }
+    }
+
+    const updateData = {
+      name: data.name ?? user.name,
+      email: data.email ?? user.email,
+      role_id: data.role_id ?? user.role_id,
+      status: data.status ?? user.status,
+    };
+
+    if (data.password) {
+      updateData.password = await hashPassword(data.password);
+    }
+
+    await user.update(updateData);
+
+    return User.findByPk(user.id, {
+      attributes: userAttribute,
+      include: [
+        {
+          model: Company,
+          as: "company",
+          attributes: ["id", "name", "email"],
+        },
+        {
+          model: Role,
+          as: "role",
+          attributes: ["id", "name"],
+        },
+      ],
+    });
+  } catch (error) {
+    if (error.statusCode) throw error;
+
+    const err = new Error(error.message || "Failed to update user");
+    err.statusCode = 500;
+    throw err;
+  }
+};
+
+export const deactivateUserService = async (id, companyId = null) => {
+  try {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    assertOwnership(user, companyId);
+
+    if (user.status === "inactive") {
+      const error = new Error("User is already inactive");
+      error.statusCode = 409;
+      throw error;
+    }
+
+    await user.update({ status: "inactive" });
+
+    return user.get({ plain: true, attributes: { exclude: ["password"] } });
+  } catch (error) {
+    if (error.statusCode) throw error;
+
+    const err = new Error(error.message || "Failed to deactivate user");
+    err.statusCode = 500;
     throw err;
   }
 };

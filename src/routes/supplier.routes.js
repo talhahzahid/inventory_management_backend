@@ -5,6 +5,8 @@ import { PERMISSIONS } from "../config/permissions.js";
 import {
   createSupplierController,
   getAllSupplierController,
+  updateSupplierController,
+  deactivateSupplierController,
 } from "../controllers/supplier.controller.js";
 
 const router = express.Router();
@@ -30,22 +32,16 @@ router.get(
   getAllSupplierController,
 );
 
-// router.get(
-//   '/:id',
-//   authorize(...PERMISSIONS.categories.read),
-//   getCategoryByIdController
-// );
+router.put(
+  "/:id",
+  authorize(...PERMISSIONS.suppliers.update),
+  updateSupplierController,
+);
 
-// router.put(
-//   '/:id',
-//   authorize(...PERMISSIONS.categories.update),
-//   updateCategoryController
-// );
-
-// router.delete(
-//   '/:id',
-//   authorize(...PERMISSIONS.categories.delete),
-//   deactivateCategoryController
-// );
+router.delete(
+  "/:id",
+  authorize(...PERMISSIONS.suppliers.delete),
+  deactivateSupplierController,
+);
 
 export default router;

@@ -7,6 +7,7 @@ import "./src/models/index.js";
 // import companyRouter from './src/routes/company.routes.js';
 import apiRoutes from "./src/routes/index.js";
 import { seedRoles } from "./src/seed/roles.seed.js";
+import { seedSuperAdmin } from "./src/seed/superAdmin.seed.js";
 
 dotenv.config();
 const app = express();
@@ -31,6 +32,7 @@ const startServer = async () => {
     await sequelize.authenticate();
     await sequelize.sync();
     await seedRoles();
+    await seedSuperAdmin();
     console.log("✔ Database connected successfully!");
     app.listen(port, () => {
       console.log(`server is running at port ${port}`);

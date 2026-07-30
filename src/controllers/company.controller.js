@@ -1,6 +1,8 @@
 import {
   createCompanyService,
   getCompanyService,
+  updateCompanyService,
+  deactivateCompanyService,
 } from "../service/company.service.js";
 import ApiResponse from "../utils/ApiResponse.js";
 
@@ -21,10 +23,57 @@ export const getCompanyController = async (req, res) => {
   try {
     const { id } = req.params;
     const { page = 1, limit = 10, search, status } = req.query;
-    const result = await getCompanyService(page, limit, id, search, status);
+    const result = await getCompanyService(
+      page,
+      limit,
+      id,
+      search,
+      status,
+      req.user?.role,
+      req.user?.company_id,
+    );
     res
       .status(200)
       .json(ApiResponse(200, "Companies fetched successfully", result));
+  } catch (error) {
+    res
+      .status(error.statusCode || 500)
+      .json(ApiResponse(error.statusCode || 500, error.message, null));
+  }
+};
+
+export const updateCompanyController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const company = await updateCompanyService(
+      id,
+      req.body,
+      req.user.role,
+      req.user.company_id,
+    );
+
+    res
+      .status(200)
+      .json(ApiResponse(200, "Company updated successfully", company));
+  } catch (error) {
+    res
+      .status(error.statusCode || 500)
+      .json(ApiResponse(error.statusCode || 500, error.message, null));
+  }
+};
+
+export const deactivateCompanyController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const company = await deactivateCompanyService(
+      id,
+      req.user.role,
+      req.user.company_id,
+    );
+
+    res
+      .status(200)
+      .json(ApiResponse(200, "Company deactivated successfully", company));
   } catch (error) {
     res
       .status(error.statusCode || 500)
