@@ -1,19 +1,8 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+import { Resend } from "resend";
+import dotenv from "dotenv";
 
-dotenv.config ();
+dotenv.config();
 
-const transporter = nodemailer.createTransport ({
-  host: process.env.EMAIL_HOST,
-  port: Number (process.env.EMAIL_PORT),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-export default transporter;
+export default resend;
