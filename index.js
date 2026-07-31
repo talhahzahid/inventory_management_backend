@@ -15,18 +15,19 @@ const port = process.env.PORT || 3000;
 
 const allowedOrigins = [
   "http://localhost:3000",
+  "https://inventory-management-frontend-ruddy.vercel.app",
   "https://inventory-management-frontend-git-b227a8-talhahzahids-projects.vercel.app",
-  "https://inventory-management-frontend-ruddy.vercel.app/"
-];
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+        return callback(null, true);
       }
+      console.warn("Blocked CORS origin:", origin);
+      return callback(null, false);
     },
     credentials: true,
   })
