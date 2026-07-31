@@ -1,8 +1,8 @@
-import { Resend } from "resend";
+import sgMail from "@sendgrid/mail";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-export default resend;
+export default sgMail;

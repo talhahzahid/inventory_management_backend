@@ -1,27 +1,21 @@
-import resend from "../config/mailer.js";
+import sgMail from "../config/mailer.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 export async function sendEmail(to, subject, text, html = "") {
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error("RESEND_API_KEY is not configured");
+  if (!process.env.SENDGRID_API_KEY) {
+    throw new Error("SENDGRID_API_KEY is not configured");
   }
 
   const from =
-    process.env.EMAIL_FROM || "Inventory App <onboarding@resend.dev>";
+    process.env.EMAIL_FROM || "Inventory App <talhazahid2038@gmail.com>";
 
-  const { data, error } = await resend.emails.send({
-    from,
+  return await sgMail.send({
     to,
+    from,
     subject,
     text,
     ...(html ? { html } : {}),
   });
-
-  if (error) {
-    throw new Error(error.message || "Failed to send email");
-  }
-
-  return data;
 }
