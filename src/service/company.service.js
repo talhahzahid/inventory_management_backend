@@ -52,11 +52,11 @@ export const createCompanyService = async (data) => {
 
     await t.commit();
 
-    sendEmail(data.email, "Welcome", `Your password is: ${password}`).catch(
-      (emailError) => {
-        console.error("Failed to send welcome email:", emailError);
-      },
-    );
+    try {
+      await sendEmail(data.email, "Welcome", `Your password is: ${password}`);
+    } catch (emailError) {
+      console.error("Failed to send welcome email:", emailError);
+    }
 
     return response;
   } catch (error) {
@@ -68,6 +68,58 @@ export const createCompanyService = async (data) => {
     throw err;
   }
 };
+
+// export const createCompanyService = async (data) => {
+//   const t = await sequelize.transaction();
+
+//   try {
+//     const existingCompany = await Company.findOne({
+//       where: { email: data.email },
+//       transaction: t,
+//     });
+
+//     if (existingCompany) {
+//       const error = new Error("Company with this email already exists");
+//       error.statusCode = 409;
+//       throw error;
+//     }
+
+//     const response = await Company.create(data, { transaction: t });
+
+//     // generate password
+//     const password = randomPasswordGenerate();
+
+//     const hashedPassword = await hashPassword(password);
+
+//     const user = {
+//       company_id: response.id,
+//       name: data.name,
+//       email: data.email,
+//       password: hashedPassword,
+//       role_id: 1,
+//       status: "active",
+//     };
+
+//     await User.create(user, { transaction: t });
+
+//     await t.commit();
+
+//     sendEmail(data.email, "Welcome", `Your password is: ${password}`).catch(
+//       (emailError) => {
+//         console.error("Failed to send welcome email:", emailError);
+//       },
+//     );
+
+//     return response;
+//   } catch (error) {
+//     await t.rollback();
+
+//     if (error.statusCode) throw error;
+//     const err = new Error(error.message || "Failed to create company");
+//     err.statusCode = 500;
+//     throw err;
+//   }
+// };
 
 export const getCompanyService = async (
   page,
