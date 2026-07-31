@@ -8,14 +8,22 @@ export async function sendEmail(to, subject, text, html = "") {
     throw new Error("SENDGRID_API_KEY is not configured");
   }
 
-  const from =
-    process.env.EMAIL_FROM || "Inventory App <talhazahid2038@gmail.com>";
+  const fromEmail =
+    process.env.EMAIL_FROM || "talhazahid2038@gmail.com";
+  const fromName = process.env.EMAIL_FROM_NAME || "Inventory App";
 
-  return await sgMail.send({
-    to,
-    from,
-    subject,
-    text,
-    ...(html ? { html } : {}),
-  });
+  try {
+    return await sgMail.send({
+      to,
+      from: { email: fromEmail, name: fromName },
+      subject,
+      text,
+      ...(html ? { html } : {}),
+    });
+  } catch (error) {
+    const details = error?.response?.body?.errors;
+    console.error("SendGrid error body:", JSON.stringify(details, null, 2));
+    const message = details?.map((e) => e.message).join("; ") || error.message;
+    throw new Error(`SendGrid: ${message}`);
+  }
 }

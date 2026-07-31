@@ -55,7 +55,10 @@ export const createCompanyService = async (data) => {
     try {
       await sendEmail(data.email, "Welcome", `Your password is: ${password}`);
     } catch (emailError) {
-      console.error("Failed to send welcome email:", emailError);
+      console.error(
+        "Failed to send welcome email:",
+        emailError.message || emailError
+      );
     }
 
     return response;
