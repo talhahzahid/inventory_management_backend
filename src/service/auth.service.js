@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/users.model.js";
 import Role from "../models/roles.model.js";
 import { jwtConfig } from "../config/jwt.js";
-import { comparePassword } from "../utils/hashPassword.js";
+import { comparePassword, hashPassword } from "../utils/hashPassword.js";
 import Company from "../models/company.model.js";
 
 export const loginService = async ({ email, password }) => {
@@ -71,5 +71,44 @@ export const loginService = async ({ email, password }) => {
       role_id: user.role_id,
       role: user.role?.name,
     },
+  };
+};
+
+export const changePasswordService = async (userId, data) => {
+  const { currentPassword, newPassword } = data;
+
+  const user = await User.findByPk(userId);
+
+  if (!user) {
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const isPasswordValid = await comparePassword(currentPassword, user.password);
+
+  if (!isPasswordValid) {
+    const error = new Error("Current password is incorrect");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const isSamePassword = await comparePassword(newPassword, user.password);
+
+  if (isSamePassword) {
+    const error = new Error(
+      "New password cannot be the same as the current password",
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+
+  user.password = hashedPassword;
+  await user.save();
+
+  return {
+    message: "Password changed successfully",
   };
 };
