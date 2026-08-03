@@ -141,7 +141,7 @@ export const getAllUsersService = async (
       include,
       limit: pageSize,
       offset,
-      order: [["id", "ASC"]],
+      order: [["id", "DESC"]],
     });
 
     return {

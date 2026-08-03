@@ -101,6 +101,7 @@ export const getAllSupplierService = async (
       where,
       limit: pageSize,
       offset,
+      order: [["id", "DESC"]],
     });
 
     return {

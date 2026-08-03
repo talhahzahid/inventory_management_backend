@@ -108,7 +108,7 @@ export const getAllCategoriesService = async (
       ],
       limit: pageSize,
       offset,
-      order: [["id", "ASC"]],
+      order: [["id", "DESC"]],
     });
 
     return {

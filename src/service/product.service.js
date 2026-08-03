@@ -200,7 +200,7 @@ export const getAllProductsService = async (
       include: productIncludes,
       limit: pageSize,
       offset,
-      order: [["id", "ASC"]],
+      order: [["id", "DESC"]],
     });
 
     return {

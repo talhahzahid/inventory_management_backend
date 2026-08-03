@@ -47,7 +47,11 @@ export const getAllInventoryService = async (
     }
 
     if (lowStock) {
-      where[Op.and] = sequelizeWhere(col("quantity"), "<=", col("minimum_stock"));
+      where[Op.and] = sequelizeWhere(
+        col("quantity"),
+        "<=",
+        col("minimum_stock"),
+      );
     }
 
     const productWhere = {};
@@ -105,7 +109,7 @@ export const getAllInventoryService = async (
       ],
       limit: pageSize,
       offset,
-      order: [["id", "ASC"]],
+      order: [["id", "DESC"]],
     });
 
     return {

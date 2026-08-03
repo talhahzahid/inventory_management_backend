@@ -57,7 +57,7 @@ export const createCompanyService = async (data) => {
     } catch (emailError) {
       console.error(
         "Failed to send welcome email:",
-        emailError.message || emailError
+        emailError.message || emailError,
       );
     }
 
@@ -173,6 +173,7 @@ export const getCompanyService = async (
       where,
       limit: pageSize,
       offset,
+      order: [["id", "DESC"]],
     });
 
     return {
