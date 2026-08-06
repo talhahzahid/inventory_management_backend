@@ -8,6 +8,10 @@ import {
 import ApiResponse from "../utils/ApiResponse.js";
 
 export const createCompanyController = async (req, res) => {
+  console.log("BODY:", req.body);
+console.log("FILE:", req.file);
+console.log("HEADERS:", req.headers["content-type"]);
+  console.log(req.body);
   const file = req.file?.path;
   try {
     const company = await createCompanyService(req.body, file);
