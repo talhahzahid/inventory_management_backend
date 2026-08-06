@@ -6,6 +6,8 @@ import { hashPassword } from "../utils/hashPassword.js";
 import randomPasswordGenerate from "../utils/password.js";
 import { sendEmail } from "./email.service.js";
 import { ROLES } from "../config/permissions.js";
+import cloudinary from "../config/cloudinary.js";
+import { uploadImageToCloudinary } from "../utils/upload.js";
 
 const assertCompanyAccess = (company, requesterRole, requesterCompanyId) => {
   if (requesterRole === ROLES.SUPER_ADMIN) return;
@@ -17,7 +19,7 @@ const assertCompanyAccess = (company, requesterRole, requesterCompanyId) => {
   }
 };
 
-export const createCompanyService = async (data) => {
+export const createCompanyService = async (data, file) => {
   const t = await sequelize.transaction();
 
   try {
@@ -32,7 +34,16 @@ export const createCompanyService = async (data) => {
       throw error;
     }
 
-    const response = await Company.create(data, { transaction: t });
+    // upload image to cloudinary
+
+    const uploadResult = await uploadImageToCloudinary(file);
+    const imageUrl = uploadResult.secure_url;
+    const payload = {
+      ...data,
+      logo: imageUrl,
+    };
+
+    const response = await Company.create(payload, { transaction: t });
 
     // generate password
     const password = randomPasswordGenerate();

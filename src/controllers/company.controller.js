@@ -1,3 +1,4 @@
+import fs from "fs";
 import {
   createCompanyService,
   getCompanyService,
@@ -7,8 +8,9 @@ import {
 import ApiResponse from "../utils/ApiResponse.js";
 
 export const createCompanyController = async (req, res) => {
+  const file = req.file?.path;
   try {
-    const company = await createCompanyService(req.body);
+    const company = await createCompanyService(req.body, file);
     res
       .status(201)
       .json(ApiResponse(201, "Company created successfully", company));
@@ -16,6 +18,12 @@ export const createCompanyController = async (req, res) => {
     res
       .status(error.statusCode || 500)
       .json(ApiResponse(error.statusCode || 500, error.message, null));
+  } finally {
+    if (file) {
+      fs.unlink(file, (err) => {
+        if (err) console.error("Failed to delete local file:", err.message);
+      });
+    }
   }
 };
 
