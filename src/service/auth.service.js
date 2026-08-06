@@ -23,7 +23,7 @@ export const loginService = async ({ email, password }) => {
       {
         model: Company,
         as: "company",
-        attributes: ["name"],
+        attributes: ["name", "logo"],
       },
     ],
   });
@@ -68,6 +68,7 @@ export const loginService = async ({ email, password }) => {
       email: user.email,
       company_id: user.company_id,
       company_name: user.company?.name,
+      logo: user?.company?.logo,
       role_id: user.role_id,
       role: user.role?.name,
     },
