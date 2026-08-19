@@ -16,6 +16,7 @@ const port = process.env.PORT || 3000;
 const allowedOrigins = [
   "http://localhost:3000",
   "https://inventory-management-frontend-ruddy.vercel.app",
+  "https://inventory-management-frontend-eight-kappa.vercel.app/",
   "https://inventory-management-frontend-git-b227a8-talhahzahids-projects.vercel.app",
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
 ].filter(Boolean);
